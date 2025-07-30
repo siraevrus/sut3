@@ -222,6 +222,102 @@ function logError($message, $context = []) {
 }
 
 /**
+ * Расчет объема по формуле шаблона
+ */
+function calculateVolumeByFormula($formula, $attributes) {
+    if (empty($formula) || empty($attributes)) {
+        return null;
+    }
+    
+    // Безопасная замена переменных в формуле
+    $safeFormula = $formula;
+    
+    foreach ($attributes as $variable => $value) {
+        // Проверяем, что значение является числом
+        if (!is_numeric($value)) {
+            continue;
+        }
+        
+        // Заменяем переменную на значение
+        $safeFormula = preg_replace('/\b' . preg_quote($variable, '/') . '\b/', $value, $safeFormula);
+    }
+    
+    // Проверяем, что в формуле остались только числа и математические операторы
+    if (!preg_match('/^[0-9+\-*\/\(\)\.\s]+$/', $safeFormula)) {
+        throw new Exception('Формула содержит недопустимые символы');
+    }
+    
+    // Вычисляем результат
+    $result = null;
+    try {
+        // Используем eval с осторожностью - только для математических выражений
+        $result = eval("return $safeFormula;");
+        
+        if ($result === false || !is_numeric($result)) {
+            throw new Exception('Ошибка вычисления формулы');
+        }
+        
+        // Округляем до 3 знаков после запятой
+        $result = round($result, 3);
+        
+    } catch (ParseError $e) {
+        throw new Exception('Синтаксическая ошибка в формуле: ' . $e->getMessage());
+    } catch (Error $e) {
+        throw new Exception('Ошибка выполнения формулы: ' . $e->getMessage());
+    }
+    
+    return $result;
+}
+
+/**
+ * Валидация формулы шаблона
+ */
+function validateFormula($formula, $variables) {
+    if (empty($formula)) {
+        return ['valid' => true, 'message' => ''];
+    }
+    
+    // Проверяем синтаксис формулы
+    if (!preg_match('/^[a-zA-Z0-9+\-*\/\(\)\.\s_]+$/', $formula)) {
+        return ['valid' => false, 'message' => 'Формула содержит недопустимые символы'];
+    }
+    
+    // Проверяем, что все переменные в формуле существуют в атрибутах
+    preg_match_all('/\b([a-zA-Z_][a-zA-Z0-9_]*)\b/', $formula, $matches);
+    $formulaVariables = array_unique($matches[1]);
+    
+    // Исключаем числа из переменных
+    $formulaVariables = array_filter($formulaVariables, function($var) {
+        return !is_numeric($var);
+    });
+    
+    $missingVariables = array_diff($formulaVariables, $variables);
+    if (!empty($missingVariables)) {
+        return [
+            'valid' => false, 
+            'message' => 'Переменные не найдены в атрибутах: ' . implode(', ', $missingVariables)
+        ];
+    }
+    
+    // Тестируем формулу с тестовыми данными
+    $testAttributes = [];
+    foreach ($variables as $var) {
+        $testAttributes[$var] = 1; // Используем 1 для всех переменных
+    }
+    
+    try {
+        $result = calculateVolumeByFormula($formula, $testAttributes);
+        if ($result === null) {
+            return ['valid' => false, 'message' => 'Не удалось вычислить формулу с тестовыми данными'];
+        }
+    } catch (Exception $e) {
+        return ['valid' => false, 'message' => 'Ошибка тестирования формулы: ' . $e->getMessage()];
+    }
+    
+    return ['valid' => true, 'message' => 'Формула корректна'];
+}
+
+/**
  * Создание директории для логов если не существует
  */
 if (!is_dir(__DIR__ . '/../logs')) {

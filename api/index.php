@@ -20,6 +20,11 @@ require_once __DIR__ . '/../config/config.php';
 require_once __DIR__ . '/includes/api_auth.php';
 require_once __DIR__ . '/includes/api_response.php';
 
+// Инициализируем сессию для поддержки внутренних запросов
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 try {
     // Получаем путь запроса
     $requestUri = $_SERVER['REQUEST_URI'];
@@ -39,9 +44,12 @@ try {
     
     // Разбиваем путь на части
     $pathParts = array_filter(explode('/', $path));
+    $pathParts = array_values($pathParts); // Переиндексируем массив
     
     $method = $_SERVER['REQUEST_METHOD'];
     $endpoint = $pathParts[0] ?? '';
+    
+
     
     // Маршрутизация
     switch ($endpoint) {

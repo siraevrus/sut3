@@ -97,6 +97,29 @@ class ApiAuth {
      * Проверка аутентификации
      */
     public static function requireAuth() {
+        // Сначала проверяем сессию (для внутренних запросов)
+        if (session_status() === PHP_SESSION_NONE) {
+            session_start();
+        }
+        
+        if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
+            // Пользователь аутентифицирован через сессию
+            try {
+                $pdo = getDBConnection();
+                $stmt = $pdo->prepare("SELECT * FROM users WHERE id = ? AND status = 1");
+                $stmt->execute([$_SESSION['user_id']]);
+                $user = $stmt->fetch();
+                
+                if ($user) {
+                    self::$currentUser = $user;
+                    return;
+                }
+            } catch (Exception $e) {
+                logError('API Session validation error: ' . $e->getMessage());
+            }
+        }
+        
+        // Если сессии нет, проверяем токен
         $token = self::getTokenFromRequest();
         
         if (!self::validateToken($token)) {

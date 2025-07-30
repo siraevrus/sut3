@@ -156,7 +156,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if (!empty($formData['formula'])) {
             $formulaValidation = validateFormula($formData['formula'], $variables);
             if (!$formulaValidation['valid']) {
-                $errors['formula'] = $formulaValidation['error'];
+                $errors['formula'] = $formulaValidation['message'];
             }
         }
         
@@ -289,58 +289,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-/**
- * Валидация формулы
- */
-function validateFormula($formula, $availableVariables = []) {
-    if (empty($formula)) {
-        return ['valid' => true];
-    }
-    
-    // Проверяем на разрешенные символы (переменные, числа, операторы, скобки, точки)
-    if (!preg_match('/^[a-zA-Z0-9_+\-*\/().\s]+$/', $formula)) {
-        return [
-            'valid' => false,
-            'error' => 'Формула содержит недопустимые символы. Разрешены: буквы, цифры, +, -, *, /, (, )'
-        ];
-    }
-    
-    // Проверяем баланс скобок
-    $openBrackets = substr_count($formula, '(');
-    $closeBrackets = substr_count($formula, ')');
-    if ($openBrackets !== $closeBrackets) {
-        return [
-            'valid' => false,
-            'error' => 'Несбалансированные скобки в формуле'
-        ];
-    }
-    
-    // Проверяем на пустые скобки
-    if (strpos($formula, '()') !== false) {
-        return [
-            'valid' => false,
-            'error' => 'Обнаружены пустые скобки в формуле'
-        ];
-    }
-    
-    // Если есть переменные, проверяем их использование в формуле
-    if (!empty($availableVariables)) {
-        $formulaVariables = [];
-        if (preg_match_all('/[a-zA-Z_][a-zA-Z0-9_]*/', $formula, $matches)) {
-            $formulaVariables = array_unique($matches[0]);
-        }
-        
-        $undefinedVariables = array_diff($formulaVariables, $availableVariables);
-        if (!empty($undefinedVariables)) {
-            return [
-                'valid' => false,
-                'error' => 'В формуле используются неопределенные переменные: ' . implode(', ', $undefinedVariables)
-            ];
-        }
-    }
-    
-    return ['valid' => true];
-}
+
 
 $pageTitle = 'Редактирование шаблона';
 
