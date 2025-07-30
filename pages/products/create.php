@@ -514,8 +514,16 @@ function loadTemplateAttributes() {
                     div.className = 'mb-3';
                     
                     let inputHtml = '';
-                    if (attr.data_type === 'select') {
-                        const options = attr.options.split(',').map(opt => opt.trim());
+                    if (attr.data_type === 'select' && attr.options) {
+                        let options = [];
+                        try {
+                            // Если options это JSON строка, парсим её
+                            options = typeof attr.options === 'string' ? JSON.parse(attr.options) : attr.options;
+                        } catch (e) {
+                            // Если не JSON, разбиваем по запятым
+                            options = attr.options.split(',').map(opt => opt.trim());
+                        }
+                        
                         inputHtml = `
                             <select class="form-select" id="attr_${attr.variable}" name="attributes[${attr.variable}]"
                                     ${attr.is_required ? 'required' : ''}

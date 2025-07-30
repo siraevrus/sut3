@@ -34,8 +34,8 @@ try {
             
             echo json_encode([
                 'success' => true,
-                'data' => $attributes
-            ]);
+                'attributes' => $attributes
+            ], JSON_UNESCAPED_UNICODE);
             break;
             
         case 'calculate_volume':
