@@ -58,6 +58,9 @@ require_once __DIR__ . '/database.php';
 // Функции для работы с сессиями и безопасностью
 require_once __DIR__ . '/../includes/functions.php';
 
+// Менеджер сессий
+require_once __DIR__ . '/../includes/session_manager.php';
+
 // Установка часового пояса
 date_default_timezone_set('Europe/Moscow');
 
