@@ -49,7 +49,7 @@ try {
     // Получаем активные сессии пользователя
     $stmt = $pdo->prepare("
         SELECT 
-            session_id,
+            id as session_id,
             ip_address,
             user_agent,
             last_activity,
