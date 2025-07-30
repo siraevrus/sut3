@@ -506,10 +506,10 @@ function loadTemplateAttributes() {
     fetch('/ajax/templates.php?action=get_attributes&template_id=' + templateId)
         .then(response => response.json())
         .then(data => {
-            if (data.success && data.data.length > 0) {
+            if (data.success && data.attributes && data.attributes.length > 0) {
                 container.innerHTML = '';
                 
-                data.data.forEach(attr => {
+                data.attributes.forEach(attr => {
                     const div = document.createElement('div');
                     div.className = 'mb-3';
                     

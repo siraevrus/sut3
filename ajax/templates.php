@@ -6,11 +6,18 @@
 
 require_once __DIR__ . '/../config/config.php';
 
-// Проверяем авторизацию
-requireAuth();
-
 // Устанавливаем заголовки для JSON
 header('Content-Type: application/json; charset=utf-8');
+
+// Проверяем авторизацию для AJAX
+if (!isLoggedIn()) {
+    http_response_code(401);
+    echo json_encode([
+        'success' => false,
+        'error' => 'Требуется авторизация'
+    ]);
+    exit;
+}
 
 try {
     $action = $_GET['action'] ?? '';
