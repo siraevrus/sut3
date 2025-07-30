@@ -318,6 +318,19 @@ function validateFormula($formula, $variables) {
 }
 
 /**
+ * Перенаправление на другую страницу
+ */
+function redirect($url) {
+    // Если URL не начинается с http, добавляем базовый путь
+    if (!preg_match('/^https?:\/\//', $url)) {
+        $url = $url;
+    }
+    
+    header('Location: ' . $url);
+    exit();
+}
+
+/**
  * Создание директории для логов если не существует
  */
 if (!is_dir(__DIR__ . '/../logs')) {
