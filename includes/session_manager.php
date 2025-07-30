@@ -10,18 +10,19 @@ class SessionManager {
      * Инициализация системы сессий
      */
     public static function init() {
-        // Настройки безопасности сессий
-        ini_set('session.cookie_httponly', 1);
-        ini_set('session.cookie_secure', isset($_SERVER['HTTPS']) ? 1 : 0);
-        ini_set('session.use_only_cookies', 1);
-        ini_set('session.cookie_samesite', 'Lax');
-        
-        // Устанавливаем время жизни сессии
-        ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
-        ini_set('session.cookie_lifetime', SESSION_LIFETIME);
-        
-        // Запускаем сессию если еще не запущена
+        // Настройки сессии устанавливаются только если сессия еще не запущена
         if (session_status() === PHP_SESSION_NONE) {
+            // Настройки безопасности сессий
+            ini_set('session.cookie_httponly', 1);
+            ini_set('session.cookie_secure', isset($_SERVER['HTTPS']) ? 1 : 0);
+            ini_set('session.use_only_cookies', 1);
+            ini_set('session.cookie_samesite', 'Lax');
+            
+            // Устанавливаем время жизни сессии
+            ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
+            ini_set('session.cookie_lifetime', SESSION_LIFETIME);
+            
+            // Запускаем сессию
             session_start();
         }
         

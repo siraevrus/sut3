@@ -4,11 +4,6 @@
  * Система складского учета (SUT)
  */
 
-// Запуск сессии
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
-
 // Настройки приложения
 define('APP_NAME', 'Система складского учета');
 define('APP_VERSION', '1.0.0');
@@ -16,8 +11,13 @@ define('APP_URL', 'http://localhost');
 
 // Настройки сессии (1 месяц = 30 дней)
 define('SESSION_LIFETIME', 30 * 24 * 60 * 60); // 30 дней в секундах
-ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
-ini_set('session.cookie_lifetime', SESSION_LIFETIME);
+
+// Настройки сессии должны быть установлены ДО запуска сессии
+if (session_status() === PHP_SESSION_NONE) {
+    ini_set('session.gc_maxlifetime', SESSION_LIFETIME);
+    ini_set('session.cookie_lifetime', SESSION_LIFETIME);
+    session_start();
+}
 
 // Настройки безопасности
 define('HASH_ALGO', 'sha256');
