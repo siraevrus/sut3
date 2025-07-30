@@ -308,34 +308,34 @@ body {
 input::placeholder,
 textarea::placeholder,
 select::placeholder {
-    color: #F1F1F1 !important;
+    color: #D9D9D9 !important;
     opacity: 1;
 }
 
 input::-webkit-input-placeholder,
 textarea::-webkit-input-placeholder,
 select::-webkit-input-placeholder {
-    color: #F1F1F1 !important;
+    color: #D9D9D9 !important;
     opacity: 1;
 }
 
 input::-moz-placeholder,
 textarea::-moz-placeholder,
 select::-moz-placeholder {
-    color: #F1F1F1 !important;
+    color: #D9D9D9 !important;
     opacity: 1;
 }
 
 input:-ms-input-placeholder,
 textarea:-ms-input-placeholder,
 select:-ms-input-placeholder {
-    color: #F1F1F1 !important;
+    color: #D9D9D9 !important;
     opacity: 1;
 }
 
 input:-moz-placeholder,
 textarea:-moz-placeholder,
 select:-moz-placeholder {
-    color: #F1F1F1 !important;
+    color: #D9D9D9 !important;
     opacity: 1;
 }
