@@ -88,6 +88,7 @@ try {
 // Обработка формы
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $departureLocation = trim($_POST['departure_location'] ?? '');
+    $arrivalLocation = trim($_POST['arrival_location'] ?? '');
     $departureDate = trim($_POST['departure_date'] ?? '');
     $arrivalDate = trim($_POST['arrival_date'] ?? '');
     $warehouseId = (int)($_POST['warehouse_id'] ?? 0);
@@ -97,6 +98,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Валидация основных полей
     if (empty($departureLocation)) {
         $errors[] = 'Место отгрузки обязательно для заполнения';
+    }
+    
+    if (empty($arrivalLocation)) {
+        $errors[] = 'Место прибытия обязательно для заполнения';
     }
     
     if (empty($departureDate)) {
@@ -212,7 +217,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Обновляем основную информацию
             $updateQuery = "
                 UPDATE goods_in_transit 
-                SET departure_location = ?, departure_date = ?, arrival_date = ?, 
+                SET departure_location = ?, arrival_location = ?, departure_date = ?, arrival_date = ?, 
                     warehouse_id = ?, goods_info = ?, updated_at = CURRENT_TIMESTAMP
                 WHERE id = ?
             ";
@@ -240,6 +245,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare($updateQuery);
             $stmt->execute([
                 $departureLocation,
+                $arrivalLocation,
                 $departureDate,
                 $arrivalDate,
                 $warehouseId,
@@ -331,6 +337,16 @@ include '../../includes/header.php';
                                     </div>
                                     <div class="col-md-6">
                                         <div class="mb-3">
+                                            <label for="arrival_location" class="form-label">Место прибытия <span class="text-danger">*</span></label>
+                                            <input type="text" name="arrival_location" id="arrival_location" class="form-control" 
+                                                   value="<?= htmlspecialchars($_POST['arrival_location'] ?? $transit['arrival_location']) ?>" 
+                                                   placeholder="Введите место прибытия" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
                                             <label for="warehouse_id" class="form-label">Склад назначения <span class="text-danger">*</span></label>
                                             <select name="warehouse_id" id="warehouse_id" class="form-select" required>
                                                 <option value="">Выберите склад</option>
@@ -342,6 +358,9 @@ include '../../includes/header.php';
                                                 <?php endforeach; ?>
                                             </select>
                                         </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <!-- Пустая колонка для симметрии -->
                                     </div>
                                 </div>
                                 
