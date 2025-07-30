@@ -30,21 +30,21 @@ try {
     $bindings = [];
     
     if (!empty($search)) {
-        $where[] = "(name LIKE ? OR description LIKE ?)";
+        $where[] = "(pt.name LIKE ? OR pt.description LIKE ?)";
         $searchTerm = '%' . $search . '%';
         $bindings[] = $searchTerm;
         $bindings[] = $searchTerm;
     }
     
     if ($status !== '') {
-        $where[] = "status = ?";
+        $where[] = "pt.status = ?";
         $bindings[] = $status;
     }
     
     $whereClause = implode(' AND ', $where);
     
     // Подсчитываем общее количество
-    $countQuery = "SELECT COUNT(*) FROM product_templates WHERE $whereClause";
+    $countQuery = "SELECT COUNT(*) FROM product_templates pt WHERE $whereClause";
     $stmt = $pdo->prepare($countQuery);
     $stmt->execute($bindings);
     $total = $stmt->fetchColumn();

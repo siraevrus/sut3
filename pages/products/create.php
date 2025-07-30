@@ -4,6 +4,8 @@
  * Система складского учета (SUT)
  */
 
+
+
 require_once __DIR__ . '/../../config/config.php';
 
 requireAccess('products');
