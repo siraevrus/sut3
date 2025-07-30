@@ -20,7 +20,7 @@ CREATE TABLE companies (
     email VARCHAR(100) COMMENT 'Email',
     inn VARCHAR(12) COMMENT 'ИНН',
     kpp VARCHAR(9) COMMENT 'КПП',
-    ogrn VARCHAR(13) COMMENT 'ОГРН',
+    ogrn VARCHAR(15) COMMENT 'ОГРН',
     bank VARCHAR(200) COMMENT 'Банк',
     account VARCHAR(20) COMMENT 'Расчетный счет',
     correspondent_account VARCHAR(20) COMMENT 'Корреспондентский счет',
