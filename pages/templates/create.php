@@ -902,7 +902,35 @@ function showFormulaTestModal(formula, variables) {
         container.appendChild(div);
     });
     
-    const modal = new bootstrap.Modal(document.getElementById('formulaTestModal'));
+    const modalElement = document.getElementById('formulaTestModal');
+    const modal = new bootstrap.Modal(modalElement);
+    
+    // Очищаем результат при открытии
+    document.getElementById('testResult').style.display = 'none';
+    
+    // Добавляем обработчик закрытия модального окна
+    modalElement.addEventListener('hidden.bs.modal', function () {
+        // Принудительно удаляем backdrop если он остался
+        const backdrop = document.querySelector('.modal-backdrop');
+        if (backdrop) {
+            backdrop.remove();
+        }
+        
+        // Убираем класс modal-open с body
+        document.body.classList.remove('modal-open');
+        document.body.style.removeProperty('padding-right');
+        
+        // Очищаем поля ввода
+        const inputs = modalElement.querySelectorAll('.test-variable');
+        inputs.forEach(input => {
+            input.value = '';
+            input.classList.remove('is-invalid');
+        });
+        
+        // Скрываем результат
+        document.getElementById('testResult').style.display = 'none';
+    }, { once: true }); // once: true означает что обработчик сработает только один раз
+    
     modal.show();
 }
 
@@ -1033,6 +1061,28 @@ document.getElementById('templateForm').addEventListener('submit', function(e) {
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
     updateAvailableVariables();
+    
+    // Дополнительная защита от зависших backdrop'ов
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal-backdrop')) {
+            // Если кликнули на backdrop, принудительно закрываем все модальные окна
+            const modals = document.querySelectorAll('.modal.show');
+            modals.forEach(modal => {
+                const bsModal = bootstrap.Modal.getInstance(modal);
+                if (bsModal) {
+                    bsModal.hide();
+                }
+            });
+            
+            // Удаляем все backdrop'ы
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            
+            // Очищаем body
+            document.body.classList.remove('modal-open');
+            document.body.style.removeProperty('padding-right');
+        }
+    });
 });
 </script>
 
