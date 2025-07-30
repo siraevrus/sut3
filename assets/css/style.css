@@ -1,0 +1,305 @@
+/**
+ * Основные стили для системы складского учета
+ * Следуем цветовой схеме из ТЗ
+ */
+
+/* Основные цвета */
+:root {
+    --primary-color: #2c5ccf;
+    --secondary-color: #38a169;
+    --danger-color: #e53e3e;
+    --background-color: #f7fafc;
+    --text-color: #2d3748;
+    --border-radius: 8px;
+    --shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Основные стили */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    color: var(--text-color);
+    background-color: var(--background-color);
+}
+
+/* Кнопки */
+.btn-primary {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}
+
+.btn-primary:hover {
+    background-color: #1e4bb8;
+    border-color: #1e4bb8;
+}
+
+.btn-success {
+    background-color: var(--secondary-color);
+    border-color: var(--secondary-color);
+}
+
+.btn-success:hover {
+    background-color: #2f855a;
+    border-color: #2f855a;
+}
+
+.btn-danger {
+    background-color: var(--danger-color);
+    border-color: var(--danger-color);
+}
+
+.btn-danger:hover {
+    background-color: #c53030;
+    border-color: #c53030;
+}
+
+/* Карточки */
+.card {
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    border: none;
+}
+
+.card-header {
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: var(--border-radius) var(--border-radius) 0 0 !important;
+}
+
+/* Таблицы */
+.table {
+    background-color: white;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.table thead th {
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    font-weight: 500;
+}
+
+.table tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Формы */
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(44, 92, 207, 0.25);
+}
+
+.form-select:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 0.2rem rgba(44, 92, 207, 0.25);
+}
+
+/* Навигация */
+.navbar-brand {
+    font-weight: 600;
+}
+
+.nav-link {
+    transition: all 0.2s ease;
+}
+
+.nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+/* Статусы */
+.status-active {
+    color: var(--secondary-color);
+}
+
+.status-blocked {
+    color: var(--danger-color);
+}
+
+.status-pending {
+    color: #ffa500;
+}
+
+.status-completed {
+    color: var(--secondary-color);
+}
+
+/* Бейджи */
+.badge {
+    font-size: 0.75em;
+}
+
+/* Алерты */
+.alert {
+    border-radius: var(--border-radius);
+    border: none;
+}
+
+/* Модальные окна */
+.modal-content {
+    border-radius: var(--border-radius);
+    border: none;
+}
+
+.modal-header {
+    background-color: var(--primary-color);
+    color: white;
+    border-radius: var(--border-radius) var(--border-radius) 0 0;
+}
+
+/* Хлебные крошки */
+.breadcrumb {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 1rem;
+}
+
+/* Кастомные классы */
+.page-header {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stats-card {
+    background: linear-gradient(135deg, var(--primary-color), #1e4bb8);
+    color: white;
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.stats-card .stats-number {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.stats-card .stats-label {
+    opacity: 0.9;
+    font-size: 0.9rem;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    .table-responsive {
+        border-radius: var(--border-radius);
+    }
+    
+    .btn {
+        margin-bottom: 0.5rem;
+    }
+    
+    .card {
+        margin-bottom: 1rem;
+    }
+    
+    .stats-card {
+        text-align: center;
+    }
+}
+
+/* Анимации */
+.fade-in {
+    animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Загрузчик */
+.spinner-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+.spinner-overlay .spinner-border {
+    color: var(--primary-color);
+}
+
+/* Иконки действий */
+.action-icons a {
+    margin: 0 0.25rem;
+    text-decoration: none;
+    padding: 0.25rem;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+}
+
+.action-icons a:hover {
+    background-color: #f8f9fa;
+}
+
+/* Файлы */
+.file-upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: var(--border-radius);
+    padding: 2rem;
+    text-align: center;
+    transition: all 0.2s ease;
+}
+
+.file-upload-area:hover {
+    border-color: var(--primary-color);
+    background-color: #f8f9fa;
+}
+
+.file-upload-area.dragover {
+    border-color: var(--primary-color);
+    background-color: rgba(44, 92, 207, 0.1);
+}
+
+/* Пустые состояния */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+/* Фильтры */
+.filters-panel {
+    background-color: white;
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+/* Детальная информация */
+.detail-row {
+    border-bottom: 1px solid #dee2e6;
+    padding: 0.75rem 0;
+}
+
+.detail-row:last-child {
+    border-bottom: none;
+}
+
+.detail-label {
+    font-weight: 500;
+    color: #495057;
+}
+
+.detail-value {
+    color: var(--text-color);
+}

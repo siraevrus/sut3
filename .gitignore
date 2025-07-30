@@ -1,0 +1,57 @@
+# Система складского учета - игнорируемые файлы
+
+# Конфигурационные файлы с чувствительными данными
+config/database.local.php
+config/config.local.php
+
+# Загруженные файлы
+uploads/*
+!uploads/.gitkeep
+
+# Логи
+logs/*
+!logs/.gitkeep
+
+# Временные файлы
+*.tmp
+*.temp
+.DS_Store
+Thumbs.db
+
+# IDE файлы
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Бэкапы
+*.bak
+*.backup
+*.sql.gz
+
+# Кеш
+cache/
+tmp/
+
+# Composer (если будет использоваться в будущем)
+/vendor/
+composer.lock
+
+# Node modules (если будет использоваться в будущем)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Системные файлы
+.htaccess.local
+robots.txt.local
+
+# Тестовые файлы
+test_uploads/
+phpunit.xml
+.phpunit.result.cache
+
+# Локальные настройки разработчика
+.env.local
+.env.*.local
