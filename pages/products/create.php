@@ -153,6 +153,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             }
                             
                             // Сохраняем товар
+                            $pdo->beginTransaction();
+                            
                             $stmt = $pdo->prepare("
                                 INSERT INTO products (
                                     template_id, warehouse_id, arrival_date, transport_number,
@@ -170,23 +172,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $user['id']
                             ]);
                             
-                            $productId = $pdo->lastInsertId();
-                            
-                            // Определяем фактическое количество (если есть атрибут quantity)
+                            // Обновляем агрегированные остатки в inventory
                             $quantityValue = isset($validatedAttributes['quantity']) ? (float)$validatedAttributes['quantity'] : 1;
                             
-                            // Добавляем запись в inventory
-                            $stmtInv = $pdo->prepare("INSERT INTO inventory (
-                                product_id, warehouse_id, template_id, quantity
-                            ) VALUES (?, ?, ?, ?) ");
+                            $stmtInv = $pdo->prepare("
+                                INSERT INTO inventory (warehouse_id, template_id, quantity)
+                                VALUES (?, ?, ?)
+                                ON DUPLICATE KEY UPDATE quantity = quantity + VALUES(quantity)
+                            ");
                             $stmtInv->execute([
-                                $productId,
                                 $formData['warehouse_id'],
                                 $formData['template_id'],
                                 $quantityValue
                             ]);
                             
-                            $_SESSION['success_message'] = 'Товар успешно добавлен';
+                            $pdo->commit();
+                            
+                            $_SESSION['success_message'] = 'Товар успешно добавлен и остатки обновлены';
                             header('Location: /pages/products/index.php');
                             exit;
                         }
