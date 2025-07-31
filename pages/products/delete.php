@@ -67,8 +67,17 @@ try {
     $pdo->beginTransaction();
     
     try {
-        // Остатки управляются отдельно, товары удаляются напрямую
-        // (остатки агрегируются по шаблонам и складам)
+        // Получаем атрибуты товара, чтобы узнать количество
+        $attributes = json_decode($product['attributes'], true) ?: [];
+        $quantityValue = isset($attributes['quantity']) ? (float)$attributes['quantity'] : 1;
+        
+        // Уменьшаем количество в inventory
+        $stmt = $pdo->prepare("
+            UPDATE inventory 
+            SET quantity = quantity - ? 
+            WHERE warehouse_id = ? AND template_id = ?
+        ");
+        $stmt->execute([$quantityValue, $product['warehouse_id'], $product['template_id']]);
         
         // Удаляем сам товар
         $stmt = $pdo->prepare("DELETE FROM products WHERE id = ?");
