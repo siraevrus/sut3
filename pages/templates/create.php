@@ -199,6 +199,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 'errors' => $errors
             ]);
         }
+    }
+}
 
 require_once __DIR__ . '/../../includes/header.php';
 ?>
