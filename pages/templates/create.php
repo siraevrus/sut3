@@ -59,10 +59,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $attrErrors[] = 'Название характеристики обязательно';
                 }
                 
-                // Переменная для формулы
-                if (empty($attr['variable'])) {
-                    $attrErrors[] = 'Переменная обязательна';
-                } elseif (!preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $attr['variable'])) {
+                // Переменная (обязательна, только если характеристика участвует в формуле)
+                if (!empty($attr['use_in_formula'])) {
+                    if (empty($attr['variable'])) {
+                        $attrErrors[] = 'Переменная обязательна, если характеристика участвует в формуле';
+                    }
+                }
+                if (!empty($attr['variable']) && !preg_match('/^[a-zA-Z_][a-zA-Z0-9_]*$/', $attr['variable'])) {
                     $attrErrors[] = 'Переменная должна содержать только английские буквы, цифры и _';
                 }
                 
@@ -99,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         // Проверяем уникальность переменных
-        $variables = array_column($validatedAttributes, 'variable');
+        $variables = array_filter(array_column($validatedAttributes, 'variable'));
         if (count($variables) !== count(array_unique($variables))) {
             $errors['attributes_general'] = 'Переменные должны быть уникальными';
         }
