@@ -53,8 +53,8 @@ try {
     }
     
     // Проверяем, нет ли связанных записей (продажи, остатки и т.д.)
-    $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales WHERE product_id = ?");
-    $stmt->execute([$productId]);
+    $stmt = $pdo->prepare("SELECT COUNT(*) FROM sales WHERE template_id = ?");
+    $stmt->execute([$product['template_id']]);
     $salesCount = $stmt->fetchColumn();
     
     if ($salesCount > 0) {
