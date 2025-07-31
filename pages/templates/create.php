@@ -52,6 +52,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $validatedAttributes = [];
         if (!empty($attributes)) {
             foreach ($attributes as $index => $attr) {
+                // Пропускаем полностью пустые блоки, созданные, но не заполненные
+                if (
+                    empty(trim($attr['name'] ?? '')) &&
+                    empty(trim($attr['variable'] ?? '')) &&
+                    empty($attr['data_type']) &&
+                    empty(trim($attr['options'] ?? '')) &&
+                    empty(trim($attr['unit'] ?? '')) &&
+                    empty($attr['is_required']) &&
+                    empty($attr['use_in_formula'])
+                ) {
+                    continue;
+                }
                 $attrErrors = [];
                 
                 // Название характеристики
