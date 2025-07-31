@@ -170,6 +170,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $user['id']
                             ]);
                             
+                            $productId = $pdo->lastInsertId();
+                            
+                            // Определяем фактическое количество (если есть атрибут quantity)
+                            $quantityValue = isset($validatedAttributes['quantity']) ? (float)$validatedAttributes['quantity'] : 1;
+                            
+                            // Добавляем запись в inventory
+                            $stmtInv = $pdo->prepare("INSERT INTO inventory (
+                                product_id, warehouse_id, template_id, quantity
+                            ) VALUES (?, ?, ?, ?) ");
+                            $stmtInv->execute([
+                                $productId,
+                                $formData['warehouse_id'],
+                                $formData['template_id'],
+                                $quantityValue
+                            ]);
+                            
                             $_SESSION['success_message'] = 'Товар успешно добавлен';
                             header('Location: /pages/products/index.php');
                             exit;
