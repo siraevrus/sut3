@@ -1,15 +1,19 @@
 <?php
 /**
- * Страница списка товаров для приемки
+ * Список товаров для приемки
+ * Показывает только товары со статусом 'confirmed'
  */
 
 require_once '../../config/config.php';
+require_once '../../includes/functions.php';
 
 // Проверка авторизации
-if (!isset($_SESSION['user_id'])) {
+if (!isLoggedIn()) {
     header('Location: /pages/auth/login.php');
     exit();
 }
+
+$currentUser = getCurrentUser();
 
 // Проверка прав доступа
 if (!hasAccessToSection('receiving')) {
@@ -17,25 +21,22 @@ if (!hasAccessToSection('receiving')) {
     exit();
 }
 
+$pageTitle = 'Приемка товаров';
+$error = null;
+$transitItems = [];
+$stats = [];
+
 try {
     $pdo = getDBConnection();
-    $currentUser = $_SESSION;
     
-    // Параметры фильтрации
-    $warehouseId = isset($_GET['warehouse_id']) ? (int)$_GET['warehouse_id'] : null;
-    $status = isset($_GET['status']) ? $_GET['status'] : 'confirmed';
+    // Строим запрос для получения товаров со статусом 'confirmed'
+    $whereConditions = ["gt.status = 'confirmed'"];
+    $params = [];
     
-    // Построение SQL запроса с учетом прав доступа
-    $whereConditions = ["gt.status = :status"];
-    $params = ['status' => $status];
-    
-    // Ограничение по складу для работников склада
-    if ($_SESSION['user_role'] === 'warehouse_worker' && !empty($_SESSION['warehouse_id'])) {
-        $whereConditions[] = "gt.warehouse_id = :user_warehouse_id";
-        $params['user_warehouse_id'] = $_SESSION['warehouse_id'];
-    } elseif ($warehouseId) {
-        $whereConditions[] = "gt.warehouse_id = :warehouse_id";
-        $params['warehouse_id'] = $warehouseId;
+    // Ограничения по складу для работника склада
+    if ($currentUser['role'] === 'warehouse_worker' && !empty($currentUser['warehouse_id'])) {
+        $whereConditions[] = "gt.warehouse_id = ?";
+        $params[] = $currentUser['warehouse_id'];
     }
     
     $whereClause = implode(' AND ', $whereConditions);
@@ -47,7 +48,6 @@ try {
             gt.departure_date,
             gt.arrival_date,
             gt.departure_location,
-            gt.arrival_location,
             gt.goods_info,
             gt.status,
             gt.notes,
@@ -67,15 +67,6 @@ try {
     $stmt->execute($params);
     $transitItems = $stmt->fetchAll();
     
-    // Получение списка складов для фильтра (только для админа)
-    $warehouses = [];
-    if ($_SESSION['user_role'] === 'admin') {
-        $warehousesQuery = "SELECT id, name FROM warehouses WHERE status = 1 ORDER BY name";
-        $warehousesStmt = $pdo->prepare($warehousesQuery);
-        $warehousesStmt->execute();
-        $warehouses = $warehousesStmt->fetchAll();
-    }
-    
     // Статистика
     $statsQuery = "
         SELECT 
@@ -85,8 +76,8 @@ try {
             COUNT(CASE WHEN status = 'in_transit' THEN 1 END) as in_transit_count
         FROM goods_in_transit gt
         WHERE 1=1 " . 
-        (($_SESSION['user_role'] === 'warehouse_worker' && !empty($_SESSION['warehouse_id'])) 
-            ? " AND gt.warehouse_id = " . (int)$_SESSION['warehouse_id'] 
+        (($currentUser['role'] === 'warehouse_worker' && !empty($currentUser['warehouse_id'])) 
+            ? " AND gt.warehouse_id = " . (int)$currentUser['warehouse_id'] 
             : "");
     
     $statsStmt = $pdo->prepare($statsQuery);
@@ -156,7 +147,7 @@ include '../../includes/header.php';
                                     <p class="card-text">Готово к приемке</p>
                                 </div>
                                 <div class="align-self-center">
-                                    <i class="fas fa-clipboard-check fa-2x"></i>
+                                    <i class="fas fa-box fa-2x"></i>
                                 </div>
                             </div>
                         </div>
@@ -186,7 +177,7 @@ include '../../includes/header.php';
                                     <p class="card-text">В пути</p>
                                 </div>
                                 <div class="align-self-center">
-                                    <i class="fas fa-shipping-fast fa-2x"></i>
+                                    <i class="fas fa-route fa-2x"></i>
                                 </div>
                             </div>
                         </div>
@@ -194,56 +185,19 @@ include '../../includes/header.php';
                 </div>
             </div>
 
-            <!-- Фильтры -->
-            <div class="card mb-4">
-                <div class="card-body">
-                    <form method="GET" class="row g-3">
-                        <div class="col-md-3">
-                            <label for="status" class="form-label">Статус</label>
-                            <select class="form-select" id="status" name="status">
-                                <option value="confirmed" <?= $status === 'confirmed' ? 'selected' : '' ?>>Готово к приемке</option>
-                                <option value="received" <?= $status === 'received' ? 'selected' : '' ?>>Принято</option>
-                                <option value="arrived" <?= $status === 'arrived' ? 'selected' : '' ?>>Прибыло</option>
-                                <option value="in_transit" <?= $status === 'in_transit' ? 'selected' : '' ?>>В пути</option>
-                                <option value="" <?= $status === '' ? 'selected' : '' ?>>Все статусы</option>
-                            </select>
-                        </div>
-                        
-                        <?php if ($_SESSION['user_role'] === 'admin' && !empty($warehouses)): ?>
-                        <div class="col-md-3">
-                            <label for="warehouse_id" class="form-label">Склад</label>
-                            <select class="form-select" id="warehouse_id" name="warehouse_id">
-                                <option value="">Все склады</option>
-                                <?php foreach ($warehouses as $warehouse): ?>
-                                    <option value="<?= $warehouse['id'] ?>" <?= $warehouseId == $warehouse['id'] ? 'selected' : '' ?>>
-                                        <?= htmlspecialchars($warehouse['name']) ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
-                        </div>
-                        <?php endif; ?>
-                        
-                        <div class="col-md-3 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary me-2">Фильтровать</button>
-                            <a href="?" class="btn btn-outline-secondary">Сбросить</a>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Таблица товаров -->
+            <!-- Список товаров для приемки -->
             <div class="card">
                 <div class="card-header">
                     <h5 class="card-title mb-0">
-                        Товары для приемки 
-                        <span class="badge bg-secondary ms-2"><?= count($transitItems ?? []) ?></span>
+                        <i class="fas fa-boxes me-2"></i>Товары готовые к приемке
                     </h5>
                 </div>
                 <div class="card-body">
                     <?php if (empty($transitItems)): ?>
-                        <div class="text-center py-4">
-                            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
-                            <p class="text-muted">Нет товаров с выбранными параметрами</p>
+                        <div class="text-center py-5">
+                            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Нет товаров для приемки</h5>
+                            <p class="text-muted">Товары со статусом "Готово к приемке" появятся здесь</p>
                         </div>
                     <?php else: ?>
                         <div class="table-responsive">
@@ -252,7 +206,6 @@ include '../../includes/header.php';
                                     <tr>
                                         <th>ID</th>
                                         <th>Откуда</th>
-                                        <th>Куда</th>
                                         <th>Склад</th>
                                         <th>Дата прибытия</th>
                                         <th>Товары</th>
@@ -266,32 +219,10 @@ include '../../includes/header.php';
                                         <?php 
                                         $goodsInfo = decodeGoodsInfo($item['goods_info']);
                                         $totalQuantity = getTotalQuantity($goodsInfo);
-                                        
-                                        $statusClass = '';
-                                        $statusText = '';
-                                        switch ($item['status']) {
-                                            case 'in_transit':
-                                                $statusClass = 'bg-info';
-                                                $statusText = 'В пути';
-                                                break;
-                                            case 'arrived':
-                                                $statusClass = 'bg-warning';
-                                                $statusText = 'Прибыло';
-                                                break;
-                                            case 'confirmed':
-                                                $statusClass = 'bg-primary';
-                                                $statusText = 'Готово к приемке';
-                                                break;
-                                            case 'received':
-                                                $statusClass = 'bg-success';
-                                                $statusText = 'Принято';
-                                                break;
-                                        }
                                         ?>
                                         <tr>
                                             <td><strong>#<?= $item['id'] ?></strong></td>
                                             <td><?= htmlspecialchars($item['departure_location']) ?></td>
-                                            <td><?= htmlspecialchars($item['arrival_location']) ?></td>
                                             <td>
                                                 <small class="text-muted"><?= htmlspecialchars($item['warehouse_name']) ?></small>
                                             </td>
@@ -306,7 +237,7 @@ include '../../includes/header.php';
                                                 </span>
                                             </td>
                                             <td>
-                                                <span class="badge <?= $statusClass ?>"><?= $statusText ?></span>
+                                                <span class="badge bg-primary">Готово к приемке</span>
                                             </td>
                                             <td>
                                                 <?= date('d.m.Y H:i', strtotime($item['created_at'])) ?>
@@ -322,12 +253,10 @@ include '../../includes/header.php';
                                                         <i class="fas fa-eye"></i>
                                                     </a>
                                                     
-                                                    <?php if ($item['status'] === 'confirmed'): ?>
-                                                        <a href="confirm.php?id=<?= $item['id'] ?>" 
-                                                           class="btn btn-success" title="Подтвердить приемку">
-                                                            <i class="fas fa-check"></i> Принять
-                                                        </a>
-                                                    <?php endif; ?>
+                                                    <a href="confirm.php?id=<?= $item['id'] ?>" 
+                                                       class="btn btn-success" title="Подтвердить приемку">
+                                                        <i class="fas fa-check"></i> Принять
+                                                    </a>
                                                 </div>
                                             </td>
                                         </tr>
