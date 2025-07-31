@@ -175,8 +175,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $attr['data_type'],
                                 $attr['options'] ? json_encode($attr['options']) : null,
                                 $attr['unit'],
-                                $attr['is_required'],
-                                $attr['use_in_formula'],
+                                $attr['is_required'] ? 1 : 0,
+                                $attr['use_in_formula'] ? 1 : 0,
                                 $attr['sort_order']
                             ]);
                         }
