@@ -116,6 +116,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         }
         
         if (empty($errors)) {
+            // Логируем успешную валидацию перед записью
+            logError('Template validation passed', [
+                'formData' => $formData,
+                'attributes' => $validatedAttributes
+            ]);
             try {
                 $pdo = getDBConnection();
                 $pdo->beginTransaction();
@@ -186,8 +191,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $errors['general'] = 'Произошла ошибка при создании шаблона';
             }
         }
+
+        // Логируем ошибки валидации, если они есть
+        if (!empty($errors)) {
+            logError('Template create validation errors', [
+                'post' => $_POST,
+                'errors' => $errors
+            ]);
+        }
     }
-}
+
 
 
 
