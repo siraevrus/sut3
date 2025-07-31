@@ -71,9 +71,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $attrErrors[] = 'Неверный тип данных';
                 }
                 
-                // Для select - проверяем варианты
-                if ($attr['data_type'] === 'select' && empty($attr['options'])) {
-                    $attrErrors[] = 'Для выпадающего списка нужно указать варианты';
+                // Для select - проверяем варианты (каждый вариант с новой строки)
+                if ($attr['data_type'] === 'select') {
+                    $rawOptions = trim($attr['options'] ?? '');
+                    // Разбиваем по переносу строки
+                    $optionsArr = array_filter(array_map('trim', preg_split('/\r?\n/', $rawOptions)));
+                    if (empty($optionsArr)) {
+                        $attrErrors[] = 'Для выпадающего списка нужно указать варианты (каждый с новой строки)';
+                    }
                 }
                 
                 if (!empty($attrErrors)) {
@@ -83,7 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         'name' => trim($attr['name']),
                         'variable' => trim($attr['variable']),
                         'data_type' => $attr['data_type'],
-                        'options' => $attr['data_type'] === 'select' ? $attr['options'] : null,
+                        'options' => $attr['data_type'] === 'select' ? $optionsArr : null,
                         'unit' => trim($attr['unit'] ?? ''),
                         'is_required' => !empty($attr['is_required']),
                         'use_in_formula' => !empty($attr['use_in_formula']),
@@ -148,7 +153,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                                 $attr['name'],
                                 $attr['variable'],
                                 $attr['data_type'],
-                                $attr['options'] ? json_encode(explode(',', $attr['options'])) : null,
+                                $attr['options'] ? json_encode($attr['options']) : null,
                                 $attr['unit'],
                                 $attr['is_required'],
                                 $attr['use_in_formula'],
@@ -456,11 +461,11 @@ require_once __DIR__ . '/../../includes/header.php';
             
             <!-- Варианты для списка -->
             <div class="col-md-4 mb-3 options-field" style="display: none;">
-                <label class="form-label">Варианты через запятую</label>
-                <input type="text" class="form-control attribute-options" name="attributes[][options]" 
-                       placeholder="Вариант1,Вариант2,Вариант3">
+                <label class="form-label">Варианты (каждый с новой строки)</label>
+                <textarea class="form-control attribute-options" name="attributes[][options]" rows="3"
+                          placeholder="Вариант 1\nВариант 2\nВариант 3"></textarea>
                 <div class="invalid-feedback"></div>
-                <div class="form-text">Разделяйте варианты запятыми</div>
+                <div class="form-text">Введите каждый вариант с новой строки</div>
             </div>
             
             <!-- Единица измерения -->
